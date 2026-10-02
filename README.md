@@ -43,6 +43,7 @@ $$
 is stored like this:
 
 ```mermaid
+%%{init: {"flowchart": {"subGraphTitleMargin": {"top": 10, "bottom": 10}}}}%%
 flowchart LR
     subgraph mat["mat (elem_t*[3])"]
         r0["row 0"]
