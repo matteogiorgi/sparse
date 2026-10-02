@@ -1,27 +1,11 @@
-# Sparse
+# Sparse matrix library
 
 A small C library for **sparse matrices of `double`**: create them, read and write single elements, add, multiply and transpose them, and save or load them in a text or binary file format.
 
-This was the midterm project ("primo frammento") of the *Laboratorio di Sistemi Operativi* (Operating Systems Lab) course at the University of Pisa, academic year 2015/16. The course staff provided the public interface ([`sparse.h`](src/sparse.h)), the print function ([`sparse_docenti.c`](src/sparse_docenti.c)), the reference tests and the `Makefile` skeleton. The implementation in [`sparse.c`](src/sparse.c) and the extra tests were written by Matteo Giorgi and Andrea Quarta.
+This was the midterm project of the *Laboratorio di Sistemi Operativi* (Operating Systems Lab) course at the Department of Computer Science, University of Pisa. The course staff provided the public interface ([`sparse.h`](https://github.com/matteogiorgi/sparse/blob/master/src/sparse.h)), the print function ([`sparse_docenti.c`](https://github.com/matteogiorgi/sparse/blob/master/src/sparse_docenti.c)), the reference tests and the `Makefile` skeleton; the implementation in [`sparse.c`](https://github.com/matteogiorgi/sparse/blob/master/src/sparse.c) and the extra tests were written by Matteo Giorgi and Andrea Quarta.
 
-- **[Project specs (Italian, PDF)](https://nbviewer.jupyter.org/github/MatteoGiorgi/sparse/blob/master/sparse.pdf)**
-- Full original instructions (Italian): [`src/README.txt`](src/README.txt)
-
-
-
-
-## Table of contents
-
-- [Data structure](#data-structure)
-- [API](#api)
-- [Algorithms](#algorithms)
-- [File formats](#file-formats)
-- [Error handling](#error-handling)
-- [Building and testing](#building-and-testing)
-- [Benchmark](#benchmark)
-- [Repository layout](#repository-layout)
-- [Known limitations](#known-limitations)
-- [License](#license)
+- [Project specs](sparse.pdf) (`sparse.pdf`)
+- [Full original instructions](https://github.com/matteogiorgi/sparse/blob/master/src/README.txt) (`src/README.txt`)
 
 
 
@@ -30,7 +14,7 @@ This was the midterm project ("primo frammento") of the *Laboratorio di Sistemi 
 
 A matrix is called *sparse* when only a tiny fraction of its entries are non-zero. Storing it densely costs $O(n \cdot m)$ memory, but storing only the non-zero entries costs $O(n + \text{nnz})$, where $\text{nnz}$ is the number of non-zero entries.
 
-This library stores a matrix as an **array of row pointers**. Each row is a **singly linked list** of its non-zero entries, **sorted by column index**. A row whose entries are all zero is just a `NULL` pointer.
+This library stores a matrix as an array of row pointers. Each row is a singly linked list of its non-zero entries, sorted by column index. A row whose entries are all zero is just a `NULL` pointer.
 
 ```c
 typedef struct elem {
@@ -80,7 +64,7 @@ The library keeps two rules true for every matrix:
 
 ## API
 
-All functions are declared in [`src/sparse.h`](src/sparse.h). Every function that allocates memory returns a new matrix that the caller owns and must free with `free_smat`.
+All functions are declared in [`src/sparse.h`](https://github.com/matteogiorgi/sparse/blob/master/src/sparse.h). Every function that allocates memory returns a new matrix that the caller owns and must free with `free_smat`.
 
 | Function | Description | Returns |
 |---|---|---|
@@ -143,7 +127,7 @@ int main(void) {
 
 ## Algorithms
 
-Each operation builds its result row by row, adding nodes in increasing column order. So the library can append every node at the **tail** of its row in $O(1)$, by keeping a tail pointer. The `INS_TAIL` macro in `sparse.c` does this, and also skips zero values.
+Each operation builds its result row by row, adding nodes in increasing column order. So the library can append every node at the tail of its row in $O(1)$, by keeping a tail pointer. The `INS_TAIL` macro in `sparse.c` does this, and also skips zero values.
 
 In the table below, $\text{nnz}(A)$ is the number of non-zero entries of $A$, and $\text{nnz}(A_{i,:})$ is the number in row $i$.
 
@@ -164,11 +148,11 @@ Cost: $O(\text{nnz}(A_{i,:}))$.
 
 ### `sum_smat`: merging sorted rows
 
-Since both row lists are sorted, the sum is a **merge**, just like the merge step of merge sort:
+Since both row lists are sorted, the sum is a merge, just like the merge step of merge sort:
 
-```math
+$$
 c_{ij} = a_{ij} + b_{ij}
-```
+$$
 
 ```mermaid
 flowchart TD
@@ -188,11 +172,11 @@ Cost: $O\big(n + \text{nnz}(A) + \text{nnz}(B)\big)$.
 
 Row $i$ of $C$ is a linear combination of the rows of $B$, weighted by the non-zero entries of row $i$ of $A$:
 
-```math
+$$
 C_{i,:} \;=\; \sum_{k \,:\, a_{ik} \neq 0} a_{ik}\, B_{k,:}
 \qquad\text{i.e.}\qquad
 c_{ij} = \sum_{k} a_{ik}\, b_{kj}
-```
+$$
 
 For each row $i$:
 
@@ -237,7 +221,7 @@ row_1 col_1 val_1
 row_k col_k val_k
 ```
 
-Example, from [`src/DATA/data1.txt`](src/DATA/data1.txt):
+Example, from [`src/DATA/data1.txt`](https://github.com/matteogiorgi/sparse/blob/master/src/DATA/data1.txt):
 
 ```
 3
@@ -247,24 +231,22 @@ Example, from [`src/DATA/data1.txt`](src/DATA/data1.txt):
 2 2 89.67
 ```
 
-`load_smat` inserts the triples through `put_elem`, so they may appear in any order. Loading fails with `NULL` if the header cannot be read, if a triple is incomplete, or if an index is out of range. For example, [`data2.txt`](src/DATA/data2.txt) has row 20 in a 20-row matrix, and [`data3.txt`](src/DATA/data3.txt) has a negative row count. `save_smat` writes the triples in row-major order, with values printed using `%lf`.
+`load_smat` inserts the triples through `put_elem`, so they may appear in any order. Loading fails with `NULL` if the header cannot be read, if a triple is incomplete, or if an index is out of range. For example, [`data2.txt`](https://github.com/matteogiorgi/sparse/blob/master/src/DATA/data2.txt) has row 20 in a 20-row matrix, and [`data3.txt`](https://github.com/matteogiorgi/sparse/blob/master/src/DATA/data3.txt) has a negative row count. `save_smat` writes the triples in row-major order, with values printed using `%lf`.
 
 
 ### Binary format
 
 The binary format, designed by the authors as the specs required, stores the same information as raw values in the machine's native byte order:
 
-| Field                    | Type       | Size* |
-|--------------------------|------------|-------|
-| `nrow`                   | `int`      | 4 B   |
-| `ncol`                   | `int`      | 4 B   |
-| for each non-zero: `row` | `int`      | 4 B   |
-| for each non-zero: `col` | `unsigned` | 4 B   |
-| for each non-zero: `val` | `double`   | 8 B   |
+| Field                    | Type       | Size (on a typical x86-64 / LP64 system) |
+|--------------------------|------------|------------------------------------------|
+| `nrow`                   | `int`      | 4 B                                      |
+| `ncol`                   | `int`      | 4 B                                      |
+| for each non-zero: `row` | `int`      | 4 B                                      |
+| for each non-zero: `col` | `unsigned` | 4 B                                      |
+| for each non-zero: `val` | `double`   | 8 B                                      |
 
-<sub>*On a typical x86-64 / LP64 system.</sub>
-
-So a matrix with $k$ non-zero entries takes $8 + 16k$ bytes. For example, the 3-element matrix saved by `test_five` is 56 bytes. `loadbin_smat` reads triples until EOF. If the file ends in the middle of a triple, it frees the partial matrix and returns `NULL`. The format is **not portable** between machines with different endianness or `int` size.
+So a matrix with $k$ non-zero entries takes $8 + 16k$ bytes. For example, the 3-element matrix saved by `test_five` is 56 bytes. `loadbin_smat` reads triples until EOF. If the file ends in the middle of a triple, it frees the partial matrix and returns `NULL`. The format is not portable between machines with different endianness or `int` size.
 
 
 
@@ -319,7 +301,7 @@ The compiler flags are `-Wall -pedantic -g -O3`. The `-O3` flag was added by the
 
 ## Benchmark
 
-[`time_execution.c`](src/time_execution.c) fills two $10^5 \times 10^5$ matrices at random (fewer than 1000 non-zeros per row) and times each operation with `clock()`. These are the authors' results on an Intel Core i5-2540M @ 2.60 GHz:
+[`time_execution.c`](https://github.com/matteogiorgi/sparse/blob/master/src/time_execution.c) fills two $10^5 \times 10^5$ matrices at random (fewer than 1000 non-zeros per row) and times each operation with `clock()`. These are the authors' results on an Intel Core i5-2540M @ 2.60 GHz:
 
 | Step                     | Time    |
 |--------------------------|---------|
