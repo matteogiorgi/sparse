@@ -126,9 +126,7 @@ int main(void) {
 
 ## Algorithms
 
-Each operation builds its result row by row, adding nodes in increasing column order. So the library can append every node at the tail of its row in $O(1)$, by keeping a tail pointer. The `INS_TAIL` macro in `sparse.c` does this, and also skips zero values.
-
-In the table below, $\text{nnz}(A)$ is the number of non-zero entries of $A$, and $\text{nnz}(A_{i,:})$ is the number in row $i$.
+Each operation builds its result row by row, adding nodes in increasing column order. So the library can append every node at the tail of its row in $O(1)$, by keeping a tail pointer. The `INS_TAIL` macro in `sparse.c` does this, and also skips zero values. In the table below, $\text{nnz}(A)$ is the number of non-zero entries of $A$, and $\text{nnz}(A_{i,:})$ is the number in row $i$.
 
 
 ### `put_elem`: sorted insertion
@@ -142,7 +140,7 @@ The internal function `put` walks row $i$ recursively until it finds the right p
 | `d == 0`, column `j` is present | unlink and free the node                                               |
 | `d == 0`, column `j` is absent  | do nothing                                                             |
 
-Cost: $O(\text{nnz}(A_{i,:}))$.
+> **Cost:** $O(\text{nnz}(A_{i,:}))$.
 
 
 ### `sum_smat`: merging sorted rows
@@ -164,7 +162,7 @@ flowchart TD
     E -- no --> M[append the head with the smaller column<br/>advance that list] --> L
 ```
 
-Cost: $O\big(n + \text{nnz}(A) + \text{nnz}(B)\big)$.
+> **Cost:** $O\big(n + \text{nnz}(A) + \text{nnz}(B)\big)$.
 
 
 ### `prod_smat`: row-wise product with a dense accumulator
@@ -182,14 +180,14 @@ For each row $i$:
 1. Walk row $i$ of $A$. For each non-zero $a_{ik}$, walk row $k$ of $B$ and add $a_{ik}\,b_{kj}$ to `tmp[j]`. Here `tmp` is a dense `double[ncol_B]` array, allocated once and reused for every row.
 2. Scan `tmp` from left to right. Append every non-zero `tmp[j]` to row $i$ of $C$, which keeps the row sorted for free, and reset `tmp[j]` to `0`.
 
-Cost: $O\big(\sum_{a_{ik}\neq 0} \text{nnz}(B_{k,:}) \;+\; n_A \cdot m_B\big)$. The second term, from scanning the dense array, is the largest cost for big matrices (see the [benchmark](#benchmark)).
+> **Cost:** $O\big(\sum_{a_{ik}\neq 0} \text{nnz}(B_{k,:}) \;+\; n_A \cdot m_B\big)$. The second term, from scanning the dense array, is the largest cost for big matrices (see the [benchmark](#benchmark)).
 
 
 ### `transp_smat`: one pass with per-column tails
 
 The function visits $A$ from top to bottom and sends each entry $a_{ij}$ to row $j$ of $A^{\mathsf{T}}$ at column $i$. Since $i$ only grows during the visit, every row of the result receives its columns in sorted order. An auxiliary array of `ncol` tail pointers makes each append $O(1)$.
 
-Cost: $O\big(n + m + \text{nnz}(A)\big)$.
+> **Cost:** $O\big(n + m + \text{nnz}(A)\big)$.
 
 
 ### Summary
